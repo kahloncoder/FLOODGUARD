@@ -1,0 +1,86 @@
+Project Goal: Build an MVP for a Flood Monitoring and Simulation Web Application for the Punjab Region
+1. Core Problem & Vision
+The goal is to build a proactive, publicly accessible web application that moves beyond reactively showing current flood levels. This MVP will serve as the foundation for a tool that can proactively simulate potential flood scenarios based on real-time data, providing early warnings and visualizing potential impact areas. We are building the first version of a vital disaster management tool.
+
+2. Target Audience (for this MVP)
+General Public: For awareness, checking real-time conditions, and seeing potential 24-48 hour flood risk in their areas.
+
+Disaster Management Officials: For a high-level, centralized dashboard view of the current and predicted situation to aid in decision-making.
+
+3. Key MVP Features (Must-Haves)
+a. Interactive Map Dashboard
+This is the central feature of the application.
+
+Use a modern mapping library like Leaflet.js or Mapbox.
+
+The map should be centered on the Punjab region.
+
+It must be responsive and work flawlessly on both desktop and mobile devices.
+
+Include standard map controls (zoom, pan) and a clear legend for all data layers.
+
+b. Data Layers (Togglable)
+The user must be able to toggle these layers on and off on the map:
+
+River Water Levels: Display water levels at key gauging stations on major rivers (e.g., Sutlej, Beas, Ravi). For the MVP, prioritize using live or recent public data feeds (e.g., from government portals). If live APIs are not accessible, fall back to using realistic mock/sample data from a recent event. Represent stations as color-coded dots (e.g., Green=Normal, Yellow=Warning, Red=Danger). Clicking a dot should show details (Station Name, Current Level, Danger Level).
+
+Rainfall Data: Show recent rainfall intensity across different districts. This can be visualized as a heatmap layer. Again, attempt to source recent data first before using mock/sample data for the MVP.
+
+c. 24-Hour Flood Inundation Forecast (Core Simulation Feature)
+This is the key proactive feature.
+
+Based on the (mock or real) weather forecast and river discharge data, the backend will run a simplified flood model.
+
+The model will generate a polygon layer showing the predicted areas of inundation over the next 24 hours.
+
+This layer should be clearly displayed on the map, perhaps with a semi-transparent blue overlay. This is a forecast, not a live view.
+
+d. Basic Alerting System
+On the map, automatically highlight districts or areas where the 24-hour forecast predicts significant flooding.
+
+Include a simple, non-intrusive "Alert" panel on the dashboard that lists the top 3-5 areas currently at highest risk.
+
+4. Technology Stack & Architecture
+Frontend:
+
+Framework: React.js (preferred), Vue.js, or Angular.
+
+Mapping: Leaflet.js or Mapbox GL JS.
+
+Styling: Tailwind CSS for a clean, modern, and responsive UI.
+
+Backend:
+
+Language/Framework: Python with FastAPI (preferred) or Flask. Python is essential for its data processing and future machine learning capabilities.
+
+Responsibilities:
+
+Serve a RESTful API to provide data (river levels, rainfall, forecast polygons) to the frontend.
+
+Run the simplified flood simulation model on a schedule (e.g., every hour) to generate the forecast data.
+
+Geospatial Libraries: Use libraries like GeoPandas and Rasterio for processing geographical data.
+
+Database:
+
+Use PostgreSQL with the PostGIS extension for storing and efficiently querying all geospatial data (e.g., river locations, forecasted inundation polygons).
+
+5. UI/UX Guidelines
+Design: Clean, modern, and intuitive. The map should be the hero element.
+
+Color Scheme: Use a color-blind friendly palette. Use colors intuitively (e.g., blue for water, red/orange/yellow for alerts).
+
+Mobile First: Ensure the layout is fully responsive and usable on a mobile phone screen.
+
+6. Deliverables
+Source Code: A well-structured codebase for the frontend and backend applications.
+
+README.md File: A detailed README.md that includes:
+
+A brief overview of the project.
+
+Prerequisites for running the project (e.g., Python, Node.js, PostgreSQL).
+
+Step-by-step instructions on how to set up the database and run the frontend and backend servers locally.
+
+A description of the API endpoints available.
