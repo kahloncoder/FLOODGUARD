@@ -1,0 +1,46 @@
+/* Leaflet CSS - REQUIRED - Must be first */
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the flood monitoring app */
+@layer base {
+  html, body {
+    @apply bg-gray-50 text-gray-900;
+  }
+  
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+}
+
+@layer components {
+  .map-container {
+    @apply w-full h-full relative;
+  }
+  
+  .alert-panel {
+    @apply bg-white shadow-lg rounded-lg p-4 border-l-4;
+  }
+  
+  .alert-high {
+    @apply border-red-500;
+  }
+  
+  .alert-medium {
+    @apply border-yellow-500;
+  }
+  
+  .alert-low {
+    @apply border-green-500;
+  }
+}
+
+/* Fix for Leaflet markers in React */
+.leaflet-div-icon {
+  background: transparent;
+  border: none;
+}
