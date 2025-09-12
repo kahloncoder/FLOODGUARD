@@ -37,6 +37,8 @@ const Dashboard: React.FC = () => {
         apiClient.getAlerts(),
       ]);
 
+      console.log('API Data received:', { stationsData, rainfallData, forecastsData, alertsData });
+
       setStations(stationsData.stations);
       setRainfall(rainfallData.rainfall);
       setForecasts(forecastsData.forecasts);
