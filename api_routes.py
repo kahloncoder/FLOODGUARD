@@ -76,7 +76,7 @@ async def get_rainfall_data(hours: int = 24, db: Session = Depends(get_db)):
                 MAX(timestamp) as latest_timestamp
             FROM rainfall_data 
             WHERE timestamp >= :cutoff_time
-            GROUP BY district, longitude, latitude
+            GROUP BY district, ST_X(location), ST_Y(location)
             ORDER BY total_rainfall DESC
         """)
         
@@ -121,7 +121,7 @@ async def get_flood_forecast(db: Session = Depends(get_db)):
                 created_at
             FROM flood_forecasts 
             WHERE forecast_time <= :forecast_time
-            AND created_at >= NOW() - INTERVAL '2 hours'
+            AND created_at >= NOW() - INTERVAL '24 hours'
             ORDER BY risk_level DESC, created_at DESC
         """)
         

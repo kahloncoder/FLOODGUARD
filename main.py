@@ -2,7 +2,6 @@ import os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, MetaData
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from geoalchemy2 import Geometry
 import uvicorn
@@ -14,7 +13,6 @@ if not DATABASE_URL:
 
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
 # FastAPI app
 app = FastAPI(title="Punjab Flood Monitoring System", description="A flood monitoring and simulation system for the Punjab region", version="1.0.0")
@@ -46,12 +44,13 @@ async def health_check():
     return {"status": "healthy"}
 
 # Import models and create tables
-from models import *
+from models import Base, MonitoringStation, WaterLevel, RainfallData, FloodForecast, District
 
 # Import and include API routes
 from api_routes import router
 app.include_router(router, prefix="/api")
 
+# Create tables using the models' Base
 Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
