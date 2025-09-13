@@ -10,6 +10,7 @@ from database import get_db
 # Import mock data for development
 try:
     import mock_data  # noqa: F401
+
     USE_MOCK_DATA = True
 except ImportError:
     USE_MOCK_DATA = False
