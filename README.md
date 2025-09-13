@@ -2,6 +2,8 @@
 
 A real-time flood monitoring and simulation web application for the Punjab region, featuring interactive mapping, water level monitoring, and 24-hour flood forecasting.
 
+<!-- CI/CD Pipeline Trigger: 2025-09-13 -->
+
 ## 🏗️ Architecture
 
 ```
