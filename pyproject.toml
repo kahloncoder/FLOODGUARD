@@ -30,6 +30,15 @@ dev = [
 requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+# Explicitly tell setuptools what to include and exclude
+py-modules = ["main", "api_routes", "models", "seed_data", "mock_data"]
+
+[tool.setuptools.packages.find]
+# Don't try to find packages automatically
+where = ["."]
+exclude = ["frontend*", "attached_assets*", "tests*", ".github*"]
+
 [tool.black]
 line-length = 88
 target-version = ['py311']
