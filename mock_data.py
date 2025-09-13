@@ -3,7 +3,6 @@ Mock data for development without database
 """
 
 from datetime import datetime, timedelta
-import json
 
 # Mock monitoring stations
 MOCK_STATIONS = [

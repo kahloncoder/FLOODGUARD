@@ -2,8 +2,8 @@
 Basic tests for the FloodGuard application
 """
 
-import pytest
 from fastapi.testclient import TestClient
+
 from main import app
 
 client = TestClient(app)
@@ -39,11 +39,11 @@ class TestModels:
     def test_models_import(self):
         """Test that models can be imported without errors"""
         from models import (
-            MonitoringStation,
-            WaterLevel,
-            RainfallData,
-            FloodForecast,
             District,
+            FloodForecast,
+            MonitoringStation,
+            RainfallData,
+            WaterLevel,
         )
 
         assert MonitoringStation is not None

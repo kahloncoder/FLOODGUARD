@@ -3,19 +3,20 @@ Seed script to populate the database with Punjab flood monitoring data
 """
 
 import os
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+
 from models import (
-    Base,
-    MonitoringStation,
-    WaterLevel,
-    RainfallData,
-    FloodForecast,
     District,
+    FloodForecast,
+    MonitoringStation,
+    RainfallData,
+    WaterLevel,
 )
-from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()

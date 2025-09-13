@@ -1,19 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import text
-from geoalchemy2.functions import ST_AsGeoJSON
-from typing import List, Dict, Any
 import json
-import os
 from datetime import datetime, timedelta
 
-from main import get_db
-from models import MonitoringStation, WaterLevel, RainfallData, FloodForecast, District
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from database import get_db
 
 # Import mock data for development
 try:
-    from mock_data import MOCK_STATIONS, MOCK_RAINFALL, MOCK_FORECASTS, MOCK_ALERTS
-
+    import mock_data  # noqa: F401
     USE_MOCK_DATA = True
 except ImportError:
     USE_MOCK_DATA = False
@@ -28,7 +24,7 @@ async def get_monitoring_stations(db: Session = Depends(get_db)):
         # Query stations with latest water level data
         query = text(
             """
-            SELECT 
+            SELECT
                 ms.id, ms.name, ms.river_name, ms.district,
                 ST_X(ms.location) as longitude, ST_Y(ms.location) as latitude,
                 ms.normal_level, ms.warning_level, ms.danger_level,
@@ -37,10 +33,10 @@ async def get_monitoring_stations(db: Session = Depends(get_db)):
                 COALESCE(wl.timestamp, NOW()) as last_updated
             FROM monitoring_stations ms
             LEFT JOIN LATERAL (
-                SELECT level, status, timestamp 
-                FROM water_levels 
-                WHERE station_id = ms.id 
-                ORDER BY timestamp DESC 
+                SELECT level, status, timestamp
+                FROM water_levels
+                WHERE station_id = ms.id
+                ORDER BY timestamp DESC
                 LIMIT 1
             ) wl ON true
             WHERE ms.is_active = true
@@ -88,13 +84,13 @@ async def get_rainfall_data(hours: int = 24, db: Session = Depends(get_db)):
 
         query = text(
             """
-            SELECT 
+            SELECT
                 district,
-                ST_X(location) as longitude, 
+                ST_X(location) as longitude,
                 ST_Y(location) as latitude,
                 SUM(rainfall_mm) as total_rainfall,
                 MAX(timestamp) as latest_timestamp
-            FROM rainfall_data 
+            FROM rainfall_data
             WHERE timestamp >= :cutoff_time
             GROUP BY district, ST_X(location), ST_Y(location)
             ORDER BY total_rainfall DESC
@@ -142,7 +138,7 @@ async def get_flood_forecast(db: Session = Depends(get_db)):
 
         query = text(
             """
-            SELECT 
+            SELECT
                 district,
                 risk_level,
                 ST_AsGeoJSON(forecast_area) as area_geojson,
@@ -150,7 +146,7 @@ async def get_flood_forecast(db: Session = Depends(get_db)):
                 confidence,
                 affected_population,
                 created_at
-            FROM flood_forecasts 
+            FROM flood_forecasts
             WHERE forecast_time <= :forecast_time
             AND created_at >= NOW() - INTERVAL '24 hours'
             ORDER BY risk_level DESC, created_at DESC
@@ -189,9 +185,9 @@ async def get_current_alerts(db: Session = Depends(get_db)):
         query = text(
             """
             WITH station_risks AS (
-                SELECT 
+                SELECT
                     ms.district,
-                    CASE 
+                    CASE
                         WHEN wl.level >= ms.danger_level THEN 'danger'
                         WHEN wl.level >= ms.warning_level THEN 'warning'
                         ELSE 'normal'
@@ -201,16 +197,16 @@ async def get_current_alerts(db: Session = Depends(get_db)):
                     1 as priority_score
                 FROM monitoring_stations ms
                 LEFT JOIN LATERAL (
-                    SELECT level, status, timestamp 
-                    FROM water_levels 
-                    WHERE station_id = ms.id 
-                    ORDER BY timestamp DESC 
+                    SELECT level, status, timestamp
+                    FROM water_levels
+                    WHERE station_id = ms.id
+                    ORDER BY timestamp DESC
                     LIMIT 1
                 ) wl ON true
                 WHERE ms.is_active = true
             ),
             forecast_risks AS (
-                SELECT 
+                SELECT
                     district,
                     risk_level,
                     CASE risk_level
@@ -219,11 +215,11 @@ async def get_current_alerts(db: Session = Depends(get_db)):
                         WHEN 'medium' THEN 2
                         ELSE 1
                     END as priority_score
-                FROM flood_forecasts 
+                FROM flood_forecasts
                 WHERE forecast_time <= NOW() + INTERVAL '24 hours'
                 AND created_at >= NOW() - INTERVAL '2 hours'
             )
-            SELECT 
+            SELECT
                 district,
                 MAX(priority_score) as max_priority,
                 STRING_AGG(DISTINCT risk_level, ', ') as combined_risk
@@ -264,7 +260,7 @@ async def get_districts(db: Session = Depends(get_db)):
     try:
         query = text(
             """
-            SELECT 
+            SELECT
                 name,
                 ST_AsGeoJSON(boundary) as boundary_geojson,
                 population,
