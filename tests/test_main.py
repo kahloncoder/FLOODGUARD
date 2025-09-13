@@ -1,6 +1,7 @@
 """
 Basic tests for the FloodGuard application
 """
+
 import pytest
 from fastapi.testclient import TestClient
 from main import app
@@ -34,10 +35,17 @@ def test_api_stations_endpoint():
 
 class TestModels:
     """Test data models"""
-    
+
     def test_models_import(self):
         """Test that models can be imported without errors"""
-        from models import MonitoringStation, WaterLevel, RainfallData, FloodForecast, District
+        from models import (
+            MonitoringStation,
+            WaterLevel,
+            RainfallData,
+            FloodForecast,
+            District,
+        )
+
         assert MonitoringStation is not None
         assert WaterLevel is not None
         assert RainfallData is not None
@@ -47,8 +55,9 @@ class TestModels:
 
 class TestAPIRoutes:
     """Test API route imports and basic functionality"""
-    
+
     def test_api_routes_import(self):
         """Test that API routes can be imported"""
         from api_routes import router
+
         assert router is not None

@@ -13,18 +13,21 @@ from models import MonitoringStation, WaterLevel, RainfallData, FloodForecast, D
 # Import mock data for development
 try:
     from mock_data import MOCK_STATIONS, MOCK_RAINFALL, MOCK_FORECASTS, MOCK_ALERTS
+
     USE_MOCK_DATA = True
 except ImportError:
     USE_MOCK_DATA = False
 
 router = APIRouter()
 
+
 @router.get("/stations")
 async def get_monitoring_stations(db: Session = Depends(get_db)):
     """Get all active monitoring stations with their current water levels"""
     try:
         # Query stations with latest water level data
-        query = text("""
+        query = text(
+            """
             SELECT 
                 ms.id, ms.name, ms.river_name, ms.district,
                 ST_X(ms.location) as longitude, ST_Y(ms.location) as latitude,
@@ -42,40 +45,49 @@ async def get_monitoring_stations(db: Session = Depends(get_db)):
             ) wl ON true
             WHERE ms.is_active = true
             ORDER BY ms.name
-        """)
-        
+        """
+        )
+
         result = db.execute(query)
         stations = []
-        
+
         for row in result:
-            stations.append({
-                "id": row.id,
-                "name": row.name,
-                "river": row.river_name,
-                "district": row.district,
-                "coordinates": [row.longitude, row.latitude],
-                "levels": {
-                    "normal": row.normal_level,
-                    "warning": row.warning_level,
-                    "danger": row.danger_level,
-                    "current": row.current_level
-                },
-                "status": row.current_status,
-                "lastUpdated": row.last_updated.isoformat() if row.last_updated else None
-            })
-        
+            stations.append(
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "river": row.river_name,
+                    "district": row.district,
+                    "coordinates": [row.longitude, row.latitude],
+                    "levels": {
+                        "normal": row.normal_level,
+                        "warning": row.warning_level,
+                        "danger": row.danger_level,
+                        "current": row.current_level,
+                    },
+                    "status": row.current_status,
+                    "lastUpdated": (
+                        row.last_updated.isoformat() if row.last_updated else None
+                    ),
+                }
+            )
+
         return {"stations": stations}
-    
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching stations: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching stations: {str(e)}"
+        )
+
 
 @router.get("/rainfall")
 async def get_rainfall_data(hours: int = 24, db: Session = Depends(get_db)):
     """Get rainfall data for the last N hours"""
     try:
         cutoff_time = datetime.utcnow() - timedelta(hours=hours)
-        
-        query = text("""
+
+        query = text(
+            """
             SELECT 
                 district,
                 ST_X(location) as longitude, 
@@ -86,30 +98,40 @@ async def get_rainfall_data(hours: int = 24, db: Session = Depends(get_db)):
             WHERE timestamp >= :cutoff_time
             GROUP BY district, ST_X(location), ST_Y(location)
             ORDER BY total_rainfall DESC
-        """)
-        
+        """
+        )
+
         result = db.execute(query, {"cutoff_time": cutoff_time})
         rainfall_data = []
-        
+
         for row in result:
             intensity = "low"
             if row.total_rainfall > 50:
                 intensity = "high"
             elif row.total_rainfall > 25:
                 intensity = "medium"
-            
-            rainfall_data.append({
-                "district": row.district,
-                "coordinates": [row.longitude, row.latitude],
-                "rainfall": row.total_rainfall,
-                "intensity": intensity,
-                "lastUpdated": row.latest_timestamp.isoformat() if row.latest_timestamp else None
-            })
-        
+
+            rainfall_data.append(
+                {
+                    "district": row.district,
+                    "coordinates": [row.longitude, row.latitude],
+                    "rainfall": row.total_rainfall,
+                    "intensity": intensity,
+                    "lastUpdated": (
+                        row.latest_timestamp.isoformat()
+                        if row.latest_timestamp
+                        else None
+                    ),
+                }
+            )
+
         return {"rainfall": rainfall_data}
-    
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching rainfall data: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching rainfall data: {str(e)}"
+        )
+
 
 @router.get("/forecast")
 async def get_flood_forecast(db: Session = Depends(get_db)):
@@ -117,8 +139,9 @@ async def get_flood_forecast(db: Session = Depends(get_db)):
     try:
         # Get forecasts for next 24 hours
         forecast_time = datetime.utcnow() + timedelta(hours=24)
-        
-        query = text("""
+
+        query = text(
+            """
             SELECT 
                 district,
                 risk_level,
@@ -131,33 +154,40 @@ async def get_flood_forecast(db: Session = Depends(get_db)):
             WHERE forecast_time <= :forecast_time
             AND created_at >= NOW() - INTERVAL '24 hours'
             ORDER BY risk_level DESC, created_at DESC
-        """)
-        
+        """
+        )
+
         result = db.execute(query, {"forecast_time": forecast_time})
         forecasts = []
-        
+
         for row in result:
-            forecasts.append({
-                "district": row.district,
-                "riskLevel": row.risk_level,
-                "area": json.loads(row.area_geojson),
-                "forecastTime": row.forecast_time.isoformat(),
-                "confidence": row.confidence,
-                "affectedPopulation": row.affected_population,
-                "createdAt": row.created_at.isoformat()
-            })
-        
+            forecasts.append(
+                {
+                    "district": row.district,
+                    "riskLevel": row.risk_level,
+                    "area": json.loads(row.area_geojson),
+                    "forecastTime": row.forecast_time.isoformat(),
+                    "confidence": row.confidence,
+                    "affectedPopulation": row.affected_population,
+                    "createdAt": row.created_at.isoformat(),
+                }
+            )
+
         return {"forecasts": forecasts}
-    
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching forecasts: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching forecasts: {str(e)}"
+        )
+
 
 @router.get("/alerts")
 async def get_current_alerts(db: Session = Depends(get_db)):
     """Get top 5 high-risk areas for alerts panel"""
     try:
         # Combine current water levels and flood forecasts to determine highest risk areas
-        query = text("""
+        query = text(
+            """
             WITH station_risks AS (
                 SELECT 
                     ms.district,
@@ -205,30 +235,35 @@ async def get_current_alerts(db: Session = Depends(get_db)):
             GROUP BY district
             ORDER BY max_priority DESC, district
             LIMIT 5
-        """)
-        
+        """
+        )
+
         result = db.execute(query)
         alerts = []
-        
+
         for row in result:
             alert_type = "high" if row.max_priority >= 3 else "medium"
-            alerts.append({
-                "district": row.district,
-                "type": alert_type,
-                "risks": row.combined_risk,
-                "priority": row.max_priority
-            })
-        
+            alerts.append(
+                {
+                    "district": row.district,
+                    "type": alert_type,
+                    "risks": row.combined_risk,
+                    "priority": row.max_priority,
+                }
+            )
+
         return {"alerts": alerts}
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching alerts: {str(e)}")
+
 
 @router.get("/districts")
 async def get_districts(db: Session = Depends(get_db)):
     """Get Punjab district boundaries"""
     try:
-        query = text("""
+        query = text(
+            """
             SELECT 
                 name,
                 ST_AsGeoJSON(boundary) as boundary_geojson,
@@ -236,20 +271,25 @@ async def get_districts(db: Session = Depends(get_db)):
                 area_sq_km
             FROM districts
             ORDER BY name
-        """)
-        
+        """
+        )
+
         result = db.execute(query)
         districts = []
-        
+
         for row in result:
-            districts.append({
-                "name": row.name,
-                "boundary": json.loads(row.boundary_geojson),
-                "population": row.population,
-                "area": row.area_sq_km
-            })
-        
+            districts.append(
+                {
+                    "name": row.name,
+                    "boundary": json.loads(row.boundary_geojson),
+                    "population": row.population,
+                    "area": row.area_sq_km,
+                }
+            )
+
         return {"districts": districts}
-    
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching districts: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching districts: {str(e)}"
+        )

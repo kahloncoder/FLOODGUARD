@@ -20,7 +20,11 @@ engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # FastAPI app
-app = FastAPI(title="Punjab Flood Monitoring System", description="A flood monitoring and simulation system for the Punjab region", version="1.0.0")
+app = FastAPI(
+    title="Punjab Flood Monitoring System",
+    description="A flood monitoring and simulation system for the Punjab region",
+    version="1.0.0",
+)
 
 # CORS middleware for frontend connectivity
 app.add_middleware(
@@ -31,6 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Database dependency
 def get_db():
     db = SessionLocal()
@@ -39,20 +44,31 @@ def get_db():
     finally:
         db.close()
 
+
 # Health check endpoint
 @app.get("/")
 async def root():
     return {"message": "Punjab Flood Monitoring System API", "version": "1.0.0"}
 
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
+
 # Import models and create tables
-from models import Base, MonitoringStation, WaterLevel, RainfallData, FloodForecast, District
+from models import (
+    Base,
+    MonitoringStation,
+    WaterLevel,
+    RainfallData,
+    FloodForecast,
+    District,
+)
 
 # Import and include API routes
 from api_routes import router
+
 app.include_router(router, prefix="/api")
 
 # Mount static files for frontend (when built with Docker)
