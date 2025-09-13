@@ -1,8 +1,6 @@
 # 🌊 FloodGuard - Punjab Flood Monitoring System
 
-A real-time flood monitoring and simulation web application for the Punjab region, featuring interactive mapping, water level monitoring, and 24-hour flood forecasting.
-
-<!-- CI/CD Pipeline Trigger: 2025-09-13 -->
+A real-time flood monitoring and simulation web application for the Punjab region, featuring interactive mapping, water level monitoring, and 24-hour flood forecasting let add more .
 
 ## 🏗️ Architecture
 
