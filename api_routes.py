@@ -4,10 +4,18 @@ from sqlalchemy import text
 from geoalchemy2.functions import ST_AsGeoJSON
 from typing import List, Dict, Any
 import json
+import os
 from datetime import datetime, timedelta
 
 from main import get_db
 from models import MonitoringStation, WaterLevel, RainfallData, FloodForecast, District
+
+# Import mock data for development
+try:
+    from mock_data import MOCK_STATIONS, MOCK_RAINFALL, MOCK_FORECASTS, MOCK_ALERTS
+    USE_MOCK_DATA = True
+except ImportError:
+    USE_MOCK_DATA = False
 
 router = APIRouter()
 

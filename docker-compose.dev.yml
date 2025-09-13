@@ -1,0 +1,45 @@
+# Docker Compose for complete local development with database
+version: '3.8'
+
+services:
+  # PostgreSQL database with PostGIS extension
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: floodguard_postgres
+    environment:
+      POSTGRES_USER: floodguard_user
+      POSTGRES_PASSWORD: floodguard_pass
+      POSTGRES_DB: floodguard_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U floodguard_user -d floodguard_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # FloodGuard application
+  floodguard-app:
+    build: .
+    container_name: floodguard_app_dev
+    environment:
+      DATABASE_URL: postgresql://floodguard_user:floodguard_pass@postgres:5432/floodguard_db
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

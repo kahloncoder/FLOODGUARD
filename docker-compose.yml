@@ -1,0 +1,30 @@
+# This file is for LOCAL TESTING to ensure your Dockerfile works.
+# It helps you run the container on your machine before setting up the CI/CD pipeline.
+version: '3.8'
+
+services:
+  floodguard-app:
+    # 'build: .' tells Docker Compose to look for a Dockerfile in the current directory and build it.
+    build: .
+    container_name: floodguard_local
+    # '.env' file should be in the same directory as this docker-compose file.
+    # It will load environment variables like your DATABASE_URL for the container to use.
+    env_file:
+      - .env
+    ports:
+      # Map port 5000 on your local machine to port 5000 inside the container.
+      - "5000:5000"
+    volumes:
+      # This is useful for development. It maps your local code into the container.
+      # If you change a Python file, the server can restart automatically (with --reload).
+      # For a production build test, you can comment this out.
+      - .:/usr/src/app
+    # Add health check to ensure the service is running properly
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Restart policy for production-like behavior
+    restart: unless-stopped

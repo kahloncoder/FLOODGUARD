@@ -7,6 +7,10 @@ import random
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from models import Base, MonitoringStation, WaterLevel, RainfallData, FloodForecast, District
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Database connection
 DATABASE_URL = os.environ.get("DATABASE_URL")

@@ -1,0 +1,60 @@
+# Production Docker Compose for VPS Deployment
+# This file should be placed on your VPS server
+version: '3.8'
+
+services:
+  floodguard-app:
+    # Use the image from GitHub Container Registry
+    # This will be automatically updated by the CI/CD pipeline
+    image: ghcr.io/kahloncoder/floodguard:main
+    container_name: floodguard_production
+    
+    # Environment variables loaded from .env file on VPS
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    
+    ports:
+      # Map port 5000 inside container to port 80 on VPS (or any port you prefer)
+      - "80:5000"
+    
+    # Restart policy for production reliability
+    restart: unless-stopped
+    
+    # Health check to ensure service is running
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Optional: Add a reverse proxy like Nginx for SSL termination
+# nginx:
+#   image: nginx:alpine
+#   container_name: floodguard_nginx
+#   ports:
+#     - "80:80"
+#     - "443:443"
+#   volumes:
+#     - ./nginx.conf:/etc/nginx/nginx.conf
+#     - ./ssl:/etc/ssl/certs
+#   depends_on:
+#     - floodguard-app
+#   restart: unless-stopped

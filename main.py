@@ -1,10 +1,15 @@
 import os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, Session
 from geoalchemy2 import Geometry
 import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Database setup
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -49,6 +54,10 @@ from models import Base, MonitoringStation, WaterLevel, RainfallData, FloodForec
 # Import and include API routes
 from api_routes import router
 app.include_router(router, prefix="/api")
+
+# Mount static files for frontend (when built with Docker)
+if os.path.exists("./static"):
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # Create tables using the models' Base
 Base.metadata.create_all(bind=engine)
