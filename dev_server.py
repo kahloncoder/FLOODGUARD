@@ -4,10 +4,11 @@ Serves the frontend without requiring database connection
 """
 
 import os
+
 import uvicorn
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 # Simple FastAPI app for frontend serving
 app = FastAPI(title="FloodGuard Development Server")
@@ -21,10 +22,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Health check endpoint
 @app.get("/dev/health")
 async def health_check():
     return {"status": "healthy", "mode": "development"}
+
 
 # Mount frontend files
 frontend_dist_path = "./frontend/dist"

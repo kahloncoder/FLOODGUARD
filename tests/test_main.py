@@ -11,18 +11,26 @@ client = TestClient(app)
 
 def test_health_check():
     """Test the health check endpoint"""
-    response = client.get("/health")
+    response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
 
-def test_root_endpoint():
-    """Test the root endpoint"""
-    response = client.get("/")
+def test_api_info_endpoint():
+    """Test the API info endpoint"""
+    response = client.get("/api/info")
     assert response.status_code == 200
     data = response.json()
     assert "message" in data
     assert "version" in data
+
+
+def test_frontend_serving():
+    """Test that frontend HTML is served at root"""
+    response = client.get("/")
+    assert response.status_code == 200
+    # Should return HTML content, not JSON
+    assert "text/html" in response.headers.get("content-type", "")
 
 
 def test_api_stations_endpoint():
