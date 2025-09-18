@@ -32,21 +32,26 @@ app.add_middleware(
 
 
 # Health check endpoint
-@app.get("/")
-async def root():
-    return {"message": "Punjab Flood Monitoring System API", "version": "1.0.0"}
-
-
-@app.get("/health")
+@app.get("/api/health")
 async def health_check():
     return {"status": "healthy"}
 
 
+@app.get("/api/info")
+async def api_info():
+    return {"message": "Punjab Flood Monitoring System API", "version": "1.0.0"}
+
+
 app.include_router(router, prefix="/api")
 
-# Mount static files for frontend (when built with Docker)
-if os.path.exists("./static"):
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# Mount static files for frontend
+frontend_dist_path = "./frontend/dist"
+if os.path.exists(frontend_dist_path):
+    app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="static")
+else:
+    # Fallback: serve from static directory (Docker production)
+    if os.path.exists("./static"):
+        app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # Create tables using the models' Base
 Base.metadata.create_all(bind=engine)
